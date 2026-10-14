@@ -1,0 +1,2379 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#111827">
+<title>AutoLog — Twój samochód pod kontrolą</title>
+
+<style>
+:root {
+  --bg: #0b1120;
+  --panel: #151f30;
+  --panel2: #1e293b;
+  --border: #2b394d;
+  --text: #f8fafc;
+  --muted: #94a3b8;
+  --green: #86efac;
+  --green-dark: #166534;
+  --red: #f87171;
+  --orange: #fb923c;
+  --radius: 18px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+button, input, select, textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+}
+
+.app {
+  max-width: 1100px;
+  margin: auto;
+  padding: 20px;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 24px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  background: #1d3b2b;
+  border-radius: 15px;
+  font-size: 26px;
+}
+
+h1, h2, h3, p {
+  margin-top: 0;
+}
+
+h1 {
+  margin-bottom: 2px;
+  color: var(--green);
+  font-size: 27px;
+}
+
+h2 {
+  font-size: 20px;
+  margin-bottom: 16px;
+}
+
+h3 {
+  font-size: 15px;
+}
+
+.subtitle, .muted, small {
+  color: var(--muted);
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 13px;
+}
+
+.top-date {
+  color: var(--muted);
+  font-size: 13px;
+  text-align: right;
+}
+
+nav {
+  display: flex;
+  gap: 7px;
+  padding: 7px;
+  margin-bottom: 24px;
+  overflow-x: auto;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 15px;
+}
+
+nav button {
+  flex: 1 0 auto;
+  padding: 11px 15px;
+  color: var(--muted);
+  background: transparent;
+  border: 0;
+  border-radius: 10px;
+  font-weight: bold;
+}
+
+nav button.active {
+  background: var(--green);
+  color: #102017;
+}
+
+.page {
+  display: none;
+}
+
+.page.active {
+  display: block;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.card {
+  min-width: 0;
+  padding: 20px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 16px;
+}
+
+.card p:last-child {
+  margin-bottom: 0;
+}
+
+.stat-label {
+  color: var(--muted);
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.stat-value {
+  font-size: clamp(20px, 3vw, 29px);
+  font-weight: bold;
+  overflow-wrap: anywhere;
+}
+
+.green-text {
+  color: var(--green);
+}
+
+.orange-text {
+  color: var(--orange);
+}
+
+.red-text {
+  color: var(--red);
+}
+
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.section-head h2 {
+  margin: 0;
+}
+
+label {
+  display: block;
+  margin: 12px 0 5px;
+  color: #e2e8f0;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+input, select, textarea {
+  width: 100%;
+  min-width: 0;
+  padding: 12px;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+input[type="file"] {
+  padding: 9px;
+  font-size: 12px;
+}
+
+input[type="file"]::file-selector-button {
+  padding: 8px;
+  margin-right: 8px;
+  background: var(--panel2);
+  color: white;
+  border: 0;
+  border-radius: 6px;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 75px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 14px;
+}
+
+.span-2 {
+  grid-column: 1 / -1;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 11px 15px;
+  color: #102017;
+  background: var(--green);
+  border: 0;
+  border-radius: 10px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.btn:hover {
+  filter: brightness(1.06);
+}
+
+.btn-secondary {
+  color: var(--text);
+  background: var(--panel2);
+  border: 1px solid var(--border);
+}
+
+.btn-danger {
+  color: white;
+  background: #7f1d1d;
+}
+
+.btn-small {
+  padding: 8px 11px;
+  font-size: 12px;
+}
+
+.btn-block {
+  width: 100%;
+  margin-top: 14px;
+}
+
+.actions {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.actions .btn {
+  flex: 1;
+}
+
+.entry {
+  padding: 15px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.entry:last-child {
+  border-bottom: 0;
+}
+
+.entry-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.entry-title {
+  font-weight: bold;
+  overflow-wrap: anywhere;
+}
+
+.entry-amount {
+  color: var(--green);
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.entry-meta {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.entry-description {
+  margin: 8px 0 0;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.receipt-thumb {
+  display: block;
+  width: 100%;
+  max-width: 230px;
+  max-height: 180px;
+  object-fit: contain;
+  object-position: left center;
+  margin-top: 10px;
+  border-radius: 10px;
+  background: var(--bg);
+  cursor: pointer;
+}
+
+.empty {
+  padding: 24px 8px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.progress {
+  height: 11px;
+  margin: 12px 0;
+  overflow: hidden;
+  background: var(--bg);
+  border-radius: 20px;
+}
+
+.progress > div {
+  height: 100%;
+  background: var(--green);
+  border-radius: inherit;
+  transition: width .2s;
+}
+
+.progress.warning > div {
+  background: var(--orange);
+}
+
+.progress.danger > div {
+  background: var(--red);
+}
+
+.status {
+  padding: 12px;
+  margin-top: 10px;
+  color: var(--muted);
+  background: var(--panel2);
+  border-radius: 10px;
+  font-size: 13px;
+}
+
+.status.green {
+  color: #dcfce7;
+  background: #14532d;
+}
+
+.status.orange {
+  color: #ffedd5;
+  background: #7c2d12;
+}
+
+.status.red {
+  color: #fee2e2;
+  background: #7f1d1d;
+}
+
+.chart {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-around;
+  gap: 10px;
+  height: 225px;
+  padding-top: 15px;
+  border-bottom: 1px solid var(--border);
+}
+
+.chart-column {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+}
+
+.chart-value {
+  color: var(--muted);
+  font-size: 10px;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.chart-bar-wrap {
+  display: flex;
+  align-items: flex-end;
+  width: min(100%, 48px);
+  height: 145px;
+}
+
+.chart-bar {
+  width: 100%;
+  min-height: 3px;
+  background: linear-gradient(180deg, #86efac, #22c55e);
+  border-radius: 7px 7px 2px 2px;
+}
+
+.chart-label {
+  color: var(--muted);
+  font-size: 11px;
+  text-align: center;
+}
+
+.category-row {
+  margin: 15px 0;
+}
+
+.category-info {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.category-track {
+  height: 7px;
+  margin-top: 7px;
+  background: var(--bg);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.category-fill {
+  height: 100%;
+  background: var(--green);
+  border-radius: inherit;
+}
+
+.car-cover {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 170px;
+  margin-bottom: 18px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #203d30, #111827);
+  border-radius: 14px;
+}
+
+.car-cover img {
+  display: block;
+  width: 100%;
+  max-height: 290px;
+  object-fit: contain;
+}
+
+.car-placeholder {
+  padding: 25px;
+  color: var(--green);
+  text-align: center;
+  font-size: 60px;
+}
+
+.car-name {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 5px;
+  overflow-wrap: anywhere;
+}
+
+.car-details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.car-detail {
+  padding: 12px;
+  background: var(--panel2);
+  border-radius: 10px;
+  overflow-wrap: anywhere;
+}
+
+.car-detail span {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+
+.car-detail strong {
+  font-size: 14px;
+}
+
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.note {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: 20px 0;
+}
+
+footer {
+  padding: 20px 0 5px;
+  color: var(--muted);
+  text-align: center;
+  font-size: 12px;
+}
+
+@media (max-width: 650px) {
+  .app {
+    padding: 12px;
+  }
+
+  header {
+    align-items: flex-start;
+  }
+
+  .top-date {
+    display: none;
+  }
+
+  nav button {
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+
+  .grid, .grid-3 {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .form-grid, .filter-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .span-2 {
+    grid-column: auto;
+  }
+
+  .card {
+    padding: 16px;
+  }
+
+  .chart {
+    gap: 5px;
+  }
+
+  .chart-value {
+    font-size: 9px;
+  }
+
+  .chart-label {
+    font-size: 10px;
+  }
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+<header>
+  <div class="brand">
+    <div class="brand-icon">🚘</div>
+    <div>
+      <h1>AutoLog</h1>
+      <p class="subtitle">Twój samochód pod kontrolą</p>
+    </div>
+  </div>
+  <div class="top-date" id="todayLabel"></div>
+</header>
+
+<nav aria-label="Menu główne">
+  <button class="active" data-page="dashboard">🏠 Start</button>
+  <button data-page="expenses">💸 Wydatki</button>
+  <button data-page="stats">📊 Statystyki</button>
+  <button data-page="car">🚗 Mój samochód</button>
+  <button data-page="reminders">📅 Terminy</button>
+  <button data-page="backup">💾 Dane</button>
+</nav>
+
+<!-- ================= START ================= -->
+
+<section class="page active" id="page-dashboard">
+  <div class="section-head">
+    <h2>Podsumowanie</h2>
+    <button class="btn btn-small" data-go="expenses">+ Dodaj wydatek</button>
+  </div>
+
+  <div class="grid-3">
+    <div class="card">
+      <div class="stat-label">W tym miesiącu</div>
+      <div class="stat-value green-text" id="dashMonth">0,00 zł</div>
+    </div>
+
+    <div class="card">
+      <div class="stat-label">Wszystkie wydatki</div>
+      <div class="stat-value" id="dashTotal">0,00 zł</div>
+    </div>
+
+    <div class="card">
+      <div class="stat-label">Liczba wpisów</div>
+      <div class="stat-value" id="dashCount">0</div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>🎯 Budżet miesięczny</h2>
+      <div class="stat-label">Wykorzystany budżet</div>
+      <div class="stat-value" id="dashBudget">Nie ustawiono</div>
+      <div class="progress" id="dashBudgetProgress">
+        <div style="width:0%"></div>
+      </div>
+      <p class="note" id="dashBudgetNote">
+        Ustaw limit wydatków w sekcji Statystyki.
+      </p>
+      <button class="btn btn-secondary btn-block" data-go="stats">
+        Zarządzaj budżetem
+      </button>
+    </div>
+
+    <div class="card">
+      <h2>🚗 Mój samochód</h2>
+      <div class="car-cover" id="dashCarCover">
+        <div class="car-placeholder">🚘</div>
+      </div>
+      <div class="car-name" id="dashCarName">Nie dodano samochodu</div>
+      <p class="muted" id="dashCarInfo">Uzupełnij swój profil auta.</p>
+      <button class="btn btn-secondary btn-block" data-go="car">
+        Edytuj profil samochodu
+      </button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-head">
+      <h2>📅 Najbliższe terminy</h2>
+      <button class="btn btn-secondary btn-small" data-go="reminders">
+        Wszystkie terminy
+      </button>
+    </div>
+    <div id="dashReminders"></div>
+  </div>
+
+  <div class="card">
+    <div class="section-head">
+      <h2>🧾 Ostatnie wydatki</h2>
+      <button class="btn btn-secondary btn-small" data-go="expenses">
+        Zobacz wszystkie
+      </button>
+    </div>
+    <div id="recentExpenses"></div>
+  </div>
+</section>
+
+<!-- ================= WYDATKI ================= -->
+
+<section class="page" id="page-expenses">
+  <div class="section-head">
+    <h2 id="expenseFormTitle">Dodaj wydatek</h2>
+  </div>
+
+  <div class="card">
+    <form id="expenseForm">
+      <div class="form-grid">
+        <div>
+          <label for="expenseDate">Data</label>
+          <input type="date" id="expenseDate" required>
+        </div>
+
+        <div>
+          <label for="expenseCategory">Kategoria</label>
+          <select id="expenseCategory" required>
+            <option>Paliwo</option>
+            <option>Serwis i naprawy</option>
+            <option>Części</option>
+            <option>Ubezpieczenie</option>
+            <option>Myjnia</option>
+            <option>Parking</option>
+            <option>Opłaty drogowe</option>
+            <option>Akcesoria</option>
+            <option>Inne</option>
+          </select>
+        </div>
+
+        <div class="span-2">
+          <label for="expenseAmount">Kwota (zł)</label>
+          <input
+            type="number"
+            id="expenseAmount"
+            min="0.01"
+            max="90071992547409"
+            step="0.01"
+            placeholder="np. 250,00"
+            required
+          >
+        </div>
+
+        <div class="span-2">
+          <label for="expenseDescription">Opis wydatku</label>
+          <input
+            type="text"
+            id="expenseDescription"
+            maxlength="300"
+            placeholder="np. Tankowanie, wymiana oleju..."
+          >
+        </div>
+
+        <div class="span-2">
+          <label for="expenseReceipt">Zdjęcie paragonu lub faktury (opcjonalnie)</label>
+          <input
+            type="file"
+            id="expenseReceipt"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+          >
+          <p class="note">
+            Zdjęcie zostanie zmniejszone przed zapisaniem.
+            Maksymalny rozmiar pliku źródłowego: 12 MB.
+          </p>
+          <div id="receiptPreview"></div>
+          <label>
+            <input type="checkbox" id="removeReceipt" style="width:auto">
+            Usuń załączone zdjęcie podczas zapisu
+          </label>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-block" id="expenseSubmit">
+        Zapisz wydatek
+      </button>
+
+      <button type="button" class="btn btn-secondary btn-block"
+        id="expenseCancel" hidden>
+        Anuluj edycję
+      </button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2>Historia wydatków</h2>
+
+    <div class="filter-grid">
+      <div>
+        <label for="searchText">Szukaj</label>
+        <input type="search" id="searchText" placeholder="Opis lub kwota...">
+      </div>
+
+      <div>
+        <label for="filterCategory">Kategoria</label>
+        <select id="filterCategory">
+          <option value="">Wszystkie kategorie</option>
+          <option>Paliwo</option>
+          <option>Serwis i naprawy</option>
+          <option>Części</option>
+          <option>Ubezpieczenie</option>
+          <option>Myjnia</option>
+          <option>Parking</option>
+          <option>Opłaty drogowe</option>
+          <option>Akcesoria</option>
+          <option>Inne</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="filterMonth">Miesiąc</label>
+        <input type="month" id="filterMonth">
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-secondary" id="clearFilters" type="button">
+        Wyczyść filtry
+      </button>
+    </div>
+
+    <p class="note" id="filterSummary" style="margin-top:15px"></p>
+    <div id="expenseHistory"></div>
+  </div>
+</section>
+
+<!-- ================= STATYSTYKI ================= -->
+
+<section class="page" id="page-stats">
+  <h2>📊 Statystyki wydatków</h2>
+
+  <div class="grid">
+    <div class="card">
+      <div class="stat-label">Wydatki w tym miesiącu</div>
+      <div class="stat-value green-text" id="statsMonth">0,00 zł</div>
+    </div>
+
+    <div class="card">
+      <div class="stat-label">Średni wydatek</div>
+      <div class="stat-value" id="statsAverage">0,00 zł</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-head">
+      <h2>Wydatki z ostatnich 6 miesięcy</h2>
+    </div>
+    <div id="monthlyChart" class="chart"></div>
+    <p class="note" style="margin-top:12px">
+      Wykres pokazuje sumę wydatków w każdym miesiącu.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>Wydatki według kategorii</h2>
+    <div id="categoryChart"></div>
+  </div>
+
+  <div class="card">
+    <h2>🎯 Budżet miesięczny</h2>
+
+    <form id="budgetForm">
+      <label for="budgetLimit">Twój miesięczny limit (zł)</label>
+      <input
+        type="number"
+        id="budgetLimit"
+        min="0"
+        max="90071992547409"
+        step="0.01"
+        placeholder="np. 1000"
+      >
+      <button type="submit" class="btn btn-block">Zapisz budżet</button>
+      <button type="button" id="clearBudget"
+        class="btn btn-secondary btn-block">
+        Usuń limit budżetu
+      </button>
+    </form>
+
+    <hr>
+
+    <div class="stat-label">Wykorzystanie budżetu</div>
+    <div class="stat-value" id="budgetUsed">Nie ustawiono</div>
+    <div class="progress" id="budgetProgress">
+      <div style="width:0%"></div>
+    </div>
+    <p id="budgetMessage" class="note"></p>
+  </div>
+
+  <div class="card">
+    <h2>📆 Podsumowanie roczne</h2>
+    <label for="statsYear">Wybierz rok</label>
+    <select id="statsYear"></select>
+
+    <div class="grid" style="margin-top:15px">
+      <div>
+        <div class="stat-label">Wydatki w roku</div>
+        <div class="stat-value green-text" id="yearTotal">0,00 zł</div>
+      </div>
+      <div>
+        <div class="stat-label">Liczba wydatków</div>
+        <div class="stat-value" id="yearCount">0</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PROFIL AUTA ================= -->
+
+<section class="page" id="page-car">
+  <h2>🚗 Mój samochód</h2>
+
+  <div class="card">
+    <div class="car-cover" id="carCover">
+      <div class="car-placeholder">🚘</div>
+    </div>
+
+    <div class="car-name" id="carDisplayName">Twój samochód</div>
+    <p class="muted" id="carDisplayInfo">Uzupełnij dane poniżej.</p>
+
+    <div class="car-details">
+      <div class="car-detail">
+        <span>Rocznik</span>
+        <strong id="carYearView">—</strong>
+      </div>
+      <div class="car-detail">
+        <span>Silnik</span>
+        <strong id="carEngineView">—</strong>
+      </div>
+      <div class="car-detail">
+        <span>Rejestracja</span>
+        <strong id="carPlateView">—</strong>
+      </div>
+      <div class="car-detail">
+        <span>Wydatki łącznie</span>
+        <strong id="carCostView">0,00 zł</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Edytuj profil</h2>
+
+    <form id="carForm">
+      <div class="form-grid">
+        <div>
+          <label for="carMake">Marka</label>
+          <input id="carMake" maxlength="60" placeholder="np. BMW">
+        </div>
+
+        <div>
+          <label for="carModel">Model</label>
+          <input id="carModel" maxlength="60" placeholder="np. Seria 3">
+        </div>
+
+        <div>
+          <label for="carYear">Rok produkcji</label>
+          <input id="carYear" type="number" min="1886" max="2100"
+            step="1" placeholder="np. 2020">
+        </div>
+
+        <div>
+          <label for="carEngine">Silnik</label>
+          <input id="carEngine" maxlength="80"
+            placeholder="np. 2.0 diesel">
+        </div>
+
+        <div class="span-2">
+          <label for="carPlate">Numer rejestracyjny</label>
+          <input id="carPlate" maxlength="20"
+            placeholder="np. DW 12345">
+        </div>
+
+        <div class="span-2">
+          <label for="carPhoto">Zdjęcie samochodu</label>
+          <input type="file" id="carPhoto"
+            accept="image/jpeg,image/png,image/webp,image/gif">
+          <p class="note">
+            Wybierz zdjęcie z urządzenia. Zostanie zapisane lokalnie.
+          </p>
+          <label>
+            <input type="checkbox" id="removeCarPhoto" style="width:auto">
+            Usuń obecne zdjęcie
+          </label>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-block">Zapisz profil</button>
+    </form>
+  </div>
+</section>
+
+<!-- ================= PRZYPOMNIENIA ================= -->
+
+<section class="page" id="page-reminders">
+  <h2>📅 Przypomnienia</h2>
+
+  <p class="muted">
+    Kontroluj terminy przeglądu technicznego oraz ubezpieczenia OC.
+    Status aktualizuje się automatycznie po otwarciu aplikacji i zmianie daty.
+  </p>
+
+  <div class="grid">
+    <div class="card">
+      <h2>🚘 Przegląd techniczny</h2>
+      <label for="inspectionDate">Ważny do</label>
+      <input type="date" id="inspectionDate">
+      <div id="inspectionStatus" class="status">
+        Ustaw datę przeglądu.
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>🛡️ Ubezpieczenie OC</h2>
+      <label for="ocDate">Ważne do</label>
+      <input type="date" id="ocDate">
+      <div id="ocStatus" class="status">
+        Ustaw datę OC.
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Legenda statusów</h2>
+    <p class="green-text">🟢 Zielony — ponad 30 dni do terminu.</p>
+    <p class="orange-text">🟠 Pomarańczowy — od 8 do 30 dni.</p>
+    <p class="red-text">🔴 Czerwony — 7 dni lub mniej albo termin minął.</p>
+    <p class="note">
+      Przypomnienia są wyświetlane w aplikacji. Nie wysyłają powiadomień,
+      gdy aplikacja jest zamknięta.
+    </p>
+  </div>
+</section>
+
+<!-- ================= KOPIE ZAPASOWE ================= -->
+
+<section class="page" id="page-backup">
+  <h2>💾 Dane i kopia zapasowa</h2>
+
+  <div class="card">
+    <h2>Eksport danych</h2>
+    <p class="muted">
+      Pobierz plik JSON zawierający wydatki, zdjęcia paragonów,
+      profil samochodu, budżet i daty przypomnień.
+    </p>
+    <button class="btn btn-block" id="exportButton">
+      Pobierz pełną kopię zapasową
+    </button>
+  </div>
+
+  <div class="card">
+    <h2>Przywracanie danych</h2>
+    <p class="muted">
+      Wybierz wcześniej pobraną kopię. Import zastąpi bieżące dane.
+      Przed importem warto pobrać aktualną kopię.
+    </p>
+    <label for="importFile">Plik kopii zapasowej</label>
+    <input type="file" id="importFile"
+      accept=".json,application/json">
+    <button class="btn btn-block" id="importButton">
+      Przywróć kopię zapasową
+    </button>
+  </div>
+
+  <div class="card">
+    <h2>ℹ️ Informacje</h2>
+    <p class="note">
+      AutoLog zapisuje dane w pamięci lokalnej przeglądarki.
+      Wyczyszczenie danych witryny może usunąć zapisane wpisy.
+      Regularnie pobieraj kopię zapasową i przechowuj ją w bezpiecznym miejscu.
+    </p>
+    <p class="note">
+      Zdjęcia zajmują miejsce w pamięci. Jeśli zapis się nie powiedzie,
+      usuń niepotrzebne załączniki lub pobierz kopię zapasową.
+    </p>
+  </div>
+</section>
+
+<footer>
+  AutoLog · Prywatny dziennik wydatków samochodowych
+</footer>
+
+</div>
+
+<script>
+"use strict";
+
+const $ = id => document.getElementById(id);
+
+const KEY = "autolog_data_v1";
+const REMINDER_KEY = "autolog_reminders_v1";
+const BUDGET_KEY = "autolog_budget_v1";
+const CAR_KEY = "autolog_car_v1";
+const BACKUP_VERSION = 2;
+
+let entries = [];
+let editId = null;
+let budget = 0;
+let car = {
+  make: "",
+  model: "",
+  year: "",
+  engine: "",
+  plate: "",
+  photo: ""
+};
+
+let reminders = {
+  inspectionDate: "",
+  ocDate: ""
+};
+
+let pendingReceipt = "";
+let pendingCarPhoto = "";
+let receiptProcessing = false;
+let carPhotoProcessing = false;
+
+// ================= WSPÓLNE FUNKCJE =================
+
+function today() {
+  const d = new Date();
+  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+  return d.toISOString().slice(0, 10);
+}
+
+function money(value) {
+  return Number(value || 0).toLocaleString("pl-PL", {
+    style: "currency",
+    currency: "PLN"
+  });
+}
+
+function safe(value) {
+  return String(value ?? "").replace(/[&<>"']/g, c => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[c]);
+}
+
+function validDate(value) {
+  if (typeof value !== "string" ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return false;
+  }
+
+  const [y, m, d] = value.split("-").map(Number);
+  const date = new Date(Date.UTC(y, m - 1, d));
+
+  return date.getUTCFullYear() === y &&
+    date.getUTCMonth() === m - 1 &&
+    date.getUTCDate() === d;
+}
+
+function makeId() {
+  return crypto.randomUUID
+    ? crypto.randomUUID()
+    : String(Date.now()) + "-" + Math.random().toString(36).slice(2);
+}
+
+function currentMonth() {
+  return today().slice(0, 7);
+}
+
+function sum(items) {
+  return items.reduce((total, item) => total + item.amount, 0);
+}
+
+function monthEntries(month) {
+  return entries.filter(e => e.date.slice(0, 7) === month);
+}
+
+function yearEntries(year) {
+  return entries.filter(e => e.date.slice(0, 4) === String(year));
+}
+
+function setImage(container, data, placeholder) {
+  if (data) {
+    container.innerHTML =
+      '<img src="' + safe(data) + '" alt="Zdjęcie" loading="lazy">';
+  } else {
+    container.innerHTML =
+      '<div class="car-placeholder">' + placeholder + '</div>';
+  }
+}
+
+function persist(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+    return true;
+  } catch (error) {
+    alert(
+      "Nie udało się zapisać danych. Pamięć przeglądarki może być pełna. " +
+      "Pobierz kopię zapasową i usuń niepotrzebne zdjęcia."
+    );
+    return false;
+  }
+}
+
+// ================= NAWIGACJA =================
+
+function goTo(page) {
+  document.querySelectorAll(".page").forEach(section => {
+    section.classList.toggle("active", section.id === "page-" + page);
+  });
+
+  document.querySelectorAll("nav button[data-page]").forEach(button => {
+    button.classList.toggle("active", button.dataset.page === page);
+  });
+
+  if (page === "stats") renderStats();
+  if (page === "car") renderCar();
+  if (page === "expenses") renderHistory();
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+document.querySelectorAll("nav button[data-page]").forEach(button => {
+  button.addEventListener("click", () => goTo(button.dataset.page));
+});
+
+document.querySelectorAll("[data-go]").forEach(button => {
+  button.addEventListener("click", () => goTo(button.dataset.go));
+});
+
+// ================= ZAPIS WYDATKÓW =================
+
+function saveEntries() {
+  return persist(KEY, entries);
+}
+
+function renderDashboard() {
+  const total = sum(entries);
+  const monthTotal = sum(monthEntries(currentMonth()));
+
+  $("dashMonth").textContent = money(monthTotal);
+  $("dashTotal").textContent = money(total);
+  $("dashCount").textContent = entries.length;
+
+  const currentBudget = budget;
+  const progress = $("dashBudgetProgress");
+  const fill = progress.firstElementChild;
+
+  if (currentBudget > 0) {
+    const percent = monthTotal / currentBudget * 100;
+    $("dashBudget").textContent = money(monthTotal) + " / " + money(currentBudget);
+
+    fill.style.width = Math.min(percent, 100) + "%";
+    progress.className = "progress" +
+      (percent >= 100 ? " danger" : percent >= 80 ? " warning" : "");
+
+    $("dashBudgetNote").textContent = percent >= 100
+      ? "Limit przekroczony o " + money(monthTotal - currentBudget) + "."
+      : "Pozostało " + money(currentBudget - monthTotal) + ".";
+  } else {
+    $("dashBudget").textContent = "Nie ustawiono";
+    fill.style.width = "0%";
+    progress.className = "progress";
+    $("dashBudgetNote").textContent =
+      "Ustaw limit wydatków w sekcji Statystyki.";
+  }
+
+  const carName = [car.make, car.model].filter(Boolean).join(" ");
+
+  $("dashCarName").textContent = carName || "Nie dodano samochodu";
+  $("dashCarInfo").textContent = [
+    car.year,
+    car.engine,
+    car.plate
+  ].filter(Boolean).join(" · ") || "Uzupełnij swój profil auta.";
+
+  setImage($("dashCarCover"), car.photo, "🚘");
+
+  const recent = [...entries]
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .slice(0, 5);
+
+  $("recentExpenses").innerHTML = recent.length
+    ? recent.map(entry => expenseHTML(entry, false)).join("")
+    : '<div class="empty">Brak wydatków. Dodaj pierwszy wpis!</div>';
+
+  renderDashboardReminders();
+}
+
+function expenseHTML(entry, controls = true) {
+  const hasReceipt = typeof entry.receipt === "string" &&
+    entry.receipt.startsWith("data:image/");
+
+  return `
+    <div class="entry">
+      <div class="entry-top">
+        <div>
+          <div class="entry-title">${safe(entry.category)}</div>
+          <div class="entry-meta">${safe(entry.date)}</div>
+        </div>
+        <div class="entry-amount">${money(entry.amount)}</div>
+      </div>
+
+      ${entry.description
+        ? `<p class="entry-description">${safe(entry.description)}</p>`
+        : ""}
+
+      ${hasReceipt
+        ? `<img class="receipt-thumb"
+            src="${safe(entry.receipt)}"
+            alt="Paragon lub faktura"
+            data-receipt="${safe(entry.id)}">`
+        : ""}
+
+      ${controls ? `
+        <div class="actions">
+          <button class="btn btn-secondary btn-small"
+            data-edit="${safe(entry.id)}">Edytuj</button>
+          <button class="btn btn-danger btn-small"
+            data-delete="${safe(entry.id)}">Usuń</button>
+        </div>
+      ` : ""}
+    </div>
+  `;
+}
+
+// ================= FORMULARZ WYDATKÓW =================
+
+function resetExpenseForm() {
+  editId = null;
+  pendingReceipt = "";
+  receiptProcessing = false;
+
+  $("expenseForm").reset();
+  $("expenseDate").value = today();
+  $("expenseFormTitle").textContent = "Dodaj wydatek";
+  $("expenseSubmit").textContent = "Zapisz wydatek";
+  $("expenseCancel").hidden = true;
+  $("expenseReceipt").disabled = false;
+  $("removeReceipt").checked = false;
+  $("receiptPreview").innerHTML = "";
+}
+
+function previewReceipt(data) {
+  $("receiptPreview").innerHTML = data
+    ? '<img class="receipt-thumb" src="' + safe(data) +
+      '" alt="Podgląd zdjęcia">'
+    : "";
+}
+
+async function imageToDataURL(file) {
+  if (!file || !file.type.startsWith("image/")) {
+    throw new Error("Wybierz prawidłowy plik graficzny.");
+  }
+
+  if (file.size > 12 * 1024 * 1024) {
+    throw new Error("Zdjęcie może mieć maksymalnie 12 MB.");
+  }
+
+  const source = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(new Error("Nie udało się odczytać zdjęcia."));
+    reader.readAsDataURL(file);
+  });
+
+  const img = await new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error("Nie udało się otworzyć zdjęcia."));
+    image.src = source;
+  });
+
+  const maxDimension = 1100;
+  const scale = Math.min(
+    1,
+    maxDimension / Math.max(img.width, img.height)
+  );
+
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(img.width * scale));
+  canvas.height = Math.max(1, Math.round(img.height * scale));
+
+  const context = canvas.getContext("2d");
+  context.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+  return canvas.toDataURL("image/jpeg", 0.78);
+}
+
+$("expenseReceipt").addEventListener("change", async event => {
+  const file = event.target.files[0];
+  pendingReceipt = "";
+
+  if (!file) {
+    $("removeReceipt").checked = false;
+    previewReceipt("");
+    return;
+  }
+
+  receiptProcessing = true;
+  $("expenseSubmit").disabled = true;
+
+  try {
+    pendingReceipt = await imageToDataURL(file);
+    $("removeReceipt").checked = false;
+    previewReceipt(pendingReceipt);
+  } catch (error) {
+    alert(error.message);
+    event.target.value = "";
+    pendingReceipt = "";
+    previewReceipt("");
+  } finally {
+    receiptProcessing = false;
+    $("expenseSubmit").disabled = false;
+  }
+});
+
+$("removeReceipt").addEventListener("change", event => {
+  if (event.target.checked) {
+    pendingReceipt = "";
+    $("expenseReceipt").value = "";
+    previewReceipt("");
+  }
+});
+
+$("expenseForm").addEventListener("submit", event => {
+  event.preventDefault();
+
+  if (receiptProcessing) {
+    alert("Poczekaj na zakończenie przetwarzania zdjęcia.");
+    return;
+  }
+
+  const amount = Number($("expenseAmount").value);
+  const date = $("expenseDate").value;
+
+  if (!validDate(date)) {
+    alert("Wybierz prawidłową datę.");
+    return;
+  }
+
+  if (!Number.isFinite(amount) || amount <= 0 ||
+      amount > Number.MAX_SAFE_INTEGER / 100) {
+    alert("Podaj prawidłową kwotę.");
+    return;
+  }
+
+  const previous = entries;
+  const old = editId ? entries.find(e => e.id === editId) : null;
+
+  const entry = {
+    id: editId || makeId(),
+    date,
+    category: $("expenseCategory").value,
+    amount: Math.round(amount * 100) / 100,
+    description: $("expenseDescription").value.trim().slice(0, 300),
+    receipt: $("removeReceipt").checked
+      ? ""
+      : pendingReceipt || (old ? old.receipt || "" : "")
+  };
+
+  entries = editId
+    ? entries.map(e => e.id === editId ? entry : e)
+    : [...entries, entry];
+
+  if (!saveEntries()) {
+    entries = previous;
+    return;
+  }
+
+  resetExpenseForm();
+  renderAll();
+  goTo("expenses");
+});
+
+$("expenseCancel").addEventListener("click", resetExpenseForm);
+
+$("expenseHistory").addEventListener("click", event => {
+  const editButton = event.target.closest("[data-edit]");
+  const deleteButton = event.target.closest("[data-delete]");
+  const receiptImage = event.target.closest("[data-receipt]");
+
+  if (receiptImage) {
+    const entry = entries.find(e => e.id === receiptImage.dataset.receipt);
+    if (entry && entry.receipt) {
+      const windowRef = window.open();
+      if (windowRef) {
+        const image = windowRef.document.createElement("img");
+        image.src = entry.receipt;
+        image.alt = "Paragon lub faktura";
+        image.style.cssText =
+          "max-width:100%;height:auto;display:block;margin:auto";
+        windowRef.document.body.appendChild(image);
+      }
+    }
+    return;
+  }
+
+  if (editButton) {
+    const entry = entries.find(e => e.id === editButton.dataset.edit);
+    if (!entry) return;
+
+    editId = entry.id;
+    pendingReceipt = "";
+
+    $("expenseDate").value = entry.date;
+    $("expenseCategory").value = entry.category;
+    $("expenseAmount").value = entry.amount;
+    $("expenseDescription").value = entry.description || "";
+    $("expenseReceipt").value = "";
+    $("removeReceipt").checked = false;
+    $("expenseFormTitle").textContent = "Edytuj wydatek";
+    $("expenseSubmit").textContent = "Zapisz zmiany";
+    $("expenseCancel").hidden = false;
+
+    previewReceipt(entry.receipt || "");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    return;
+  }
+
+  if (deleteButton) {
+    const entry = entries.find(e => e.id === deleteButton.dataset.delete);
+    if (!entry || !confirm("Czy na pewno usunąć ten wydatek?")) return;
+
+    const previous = entries;
+    entries = entries.filter(e => e.id !== entry.id);
+
+    if (!saveEntries()) {
+      entries = previous;
+      return;
+    }
+
+    renderAll();
+  }
+});
+
+// ================= WYSZUKIWANIE I FILTRY =================
+
+function filteredEntries() {
+  const query = $("searchText").value.trim().toLocaleLowerCase("pl-PL");
+  const category = $("filterCategory").value;
+  const month = $("filterMonth").value;
+
+  return [...entries]
+    .filter(e => !category || e.category === category)
+    .filter(e => !month || e.date.slice(0, 7) === month)
+    .filter(e => {
+      if (!query) return true;
+
+      const text = [
+        e.description,
+        e.category,
+        e.date,
+        e.amount
+      ].join(" ").toLocaleLowerCase("pl-PL");
+
+      return text.includes(query);
+    })
+    .sort((a, b) => b.date.localeCompare(a.date));
+}
+
+function renderHistory() {
+  const list = filteredEntries();
+
+  $("filterSummary").textContent =
+    "Wyświetlane wpisy: " + list.length +
+    " · Suma: " + money(sum(list));
+
+  $("expenseHistory").innerHTML = list.length
+    ? list.map(e => expenseHTML(e, true)).join("")
+    : '<div class="empty">Brak wydatków pasujących do filtrów.</div>';
+}
+
+["searchText", "filterCategory", "filterMonth"].forEach(id => {
+  $(id).addEventListener("input", renderHistory);
+  $(id).addEventListener("change", renderHistory);
+});
+
+$("clearFilters").addEventListener("click", () => {
+  $("searchText").value = "";
+  $("filterCategory").value = "";
+  $("filterMonth").value = "";
+  renderHistory();
+});
+
+// ================= BUDŻET =================
+
+function saveBudget() {
+  return persist(BUDGET_KEY, budget);
+}
+
+function renderBudget() {
+  const total = sum(monthEntries(currentMonth()));
+  const progress = $("budgetProgress");
+  const fill = progress.firstElementChild;
+
+  if (budget > 0) {
+    const percent = total / budget * 100;
+
+    $("budgetUsed").textContent =
+      money(total) + " / " + money(budget);
+
+    fill.style.width = Math.min(percent, 100) + "%";
+
+    progress.className = "progress" +
+      (percent >= 100 ? " danger" : percent >= 80 ? " warning" : "");
+
+    $("budgetMessage").textContent = percent >= 100
+      ? "Przekroczono limit o " + money(total - budget) + "."
+      : percent >= 80
+        ? "Uwaga! Pozostało tylko " + money(budget - total) + "."
+        : "Pozostało " + money(budget - total) + " do wykorzystania.";
+  } else {
+    $("budgetUsed").textContent = "Nie ustawiono";
+    fill.style.width = "0%";
+    progress.className = "progress";
+    $("budgetMessage").textContent =
+      "Wpisz limit powyżej, aby kontrolować miesięczne koszty.";
+  }
+}
+
+$("budgetForm").addEventListener("submit", event => {
+  event.preventDefault();
+
+  const raw = $("budgetLimit").value;
+  const value = Number(raw);
+
+  if (raw === "" || !Number.isFinite(value) || value <= 0 ||
+      value > Number.MAX_SAFE_INTEGER / 100) {
+    alert("Podaj prawidłowy budżet większy od zera.");
+    return;
+  }
+
+  const previous = budget;
+  budget = Math.round(value * 100) / 100;
+
+  if (!saveBudget()) {
+    budget = previous;
+    return;
+  }
+
+  renderAll();
+  alert("Budżet został zapisany.");
+});
+
+$("clearBudget").addEventListener("click", () => {
+  if (!confirm("Czy usunąć ustawiony limit budżetu?")) return;
+
+  const previous = budget;
+  budget = 0;
+
+  if (!saveBudget()) {
+    budget = previous;
+    return;
+  }
+
+  $("budgetLimit").value = "";
+  renderAll();
+});
+
+// ================= WYKRESY I STATYSTYKI =================
+
+const monthNames = [
+  "Sty", "Lut", "Mar", "Kwi", "Maj", "Cze",
+  "Lip", "Sie", "Wrz", "Paź", "Lis", "Gru"
+];
+
+function lastSixMonths() {
+  const now = new Date();
+  const result = [];
+
+  for (let i = 5; i >= 0; i--) {
+    const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const key = year + "-" + month;
+
+    result.push({
+      key,
+      label: monthNames[date.getMonth()],
+      total: sum(monthEntries(key))
+    });
+  }
+
+  return result;
+}
+
+function renderMonthlyChart() {
+  const data = lastSixMonths();
+  const max = Math.max(1, ...data.map(x => x.total));
+
+  $("monthlyChart").innerHTML = data.map(item => {
+    const height = item.total > 0
+      ? Math.max(4, item.total / max * 145)
+      : 3;
+
+    return `
+      <div class="chart-column">
+        <div class="chart-value">${item.total ? safe(money(item.total)) : "—"}</div>
+        <div class="chart-bar-wrap">
+          <div class="chart-bar"
+            style="height:${height}px"
+            title="${safe(item.key)}: ${safe(money(item.total))}">
+          </div>
+        </div>
+        <div class="chart-label">${safe(item.label)}<br>${safe(item.key.slice(0,4))}</div>
+      </div>
+    `;
+  }).join("");
+}
+
+function renderCategoryChart() {
+  const totals = {};
+
+  entries.forEach(entry => {
+    totals[entry.category] = (totals[entry.category] || 0) + entry.amount;
+  });
+
+  const sorted = Object.entries(totals)
+    .sort((a, b) => b[1] - a[1]);
+
+  const total = sum(entries);
+
+  $("categoryChart").innerHTML = sorted.length
+    ? sorted.map(([category, amount]) => {
+        const percent = total > 0 ? amount / total * 100 : 0;
+
+        return `
+          <div class="category-row">
+            <div class="category-info">
+              <span>${safe(category)}</span>
+              <strong>${safe(money(amount))} · ${percent.toFixed(1)}%</strong>
+            </div>
+            <div class="category-track">
+              <div class="category-fill"
+                style="width:${Math.min(percent,100)}%">
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("")
+    : '<div class="empty">Dodaj wydatki, aby zobaczyć statystyki.</div>';
+}
+
+function renderYearOptions() {
+  const select = $("statsYear");
+  const previous = select.value;
+  const years = new Set([String(new Date().getFullYear())]);
+
+  entries.forEach(e => years.add(e.date.slice(0, 4)));
+
+  const sorted = [...years].sort((a, b) => Number(b) - Number(a));
+
+  select.innerHTML = sorted.map(year =>
+    `<option value="${safe(year)}">${safe(year)}</option>`
+  ).join("");
+
+  if (years.has(previous)) select.value = previous;
+}
+
+function renderYearStats() {
+  const year = $("statsYear").value || String(new Date().getFullYear());
+  const list = yearEntries(year);
+
+  $("yearTotal").textContent = money(sum(list));
+  $("yearCount").textContent = list.length;
+}
+
+function renderStats() {
+  const current = monthEntries(currentMonth());
+
+  $("statsMonth").textContent = money(sum(current));
+  $("statsAverage").textContent = money(
+    entries.length ? sum(entries) / entries.length : 0
+  );
+
+  $("budgetLimit").value = budget || "";
+
+  renderBudget();
+  renderMonthlyChart();
+  renderCategoryChart();
+  renderYearOptions();
+  renderYearStats();
+}
+
+$("statsYear").addEventListener("change", renderYearStats);
+
+// ================= PROFIL SAMOCHODU =================
+
+async function prepareCarPhoto(file) {
+  return imageToDataURL(file);
+}
+
+$("carPhoto").addEventListener("change", async event => {
+  const file = event.target.files[0];
+  pendingCarPhoto = "";
+
+  if (!file) {
+    carPhotoProcessing = false;
+    return;
+  }
+
+  carPhotoProcessing = true;
+
+  try {
+    pendingCarPhoto = await prepareCarPhoto(file);
+    $("removeCarPhoto").checked = false;
+  } catch (error) {
+    alert(error.message);
+    event.target.value = "";
+    pendingCarPhoto = "";
+  } finally {
+    carPhotoProcessing = false;
+  }
+});
+
+$("removeCarPhoto").addEventListener("change", event => {
+  if (event.target.checked) {
+    pendingCarPhoto = "";
+    $("carPhoto").value = "";
+  }
+});
+
+function renderCar() {
+  const name = [car.make, car.model].filter(Boolean).join(" ");
+  const info = [car.year, car.engine].filter(Boolean).join(" · ");
+
+  $("carDisplayName").textContent = name || "Twój samochód";
+  $("carDisplayInfo").textContent = info || "Uzupełnij dane samochodu.";
+
+  $("carYearView").textContent = car.year || "—";
+  $("carEngineView").textContent = car.engine || "—";
+  $("carPlateView").textContent = car.plate || "—";
+  $("carCostView").textContent = money(sum(entries));
+
+  $("carMake").value = car.make;
+  $("carModel").value = car.model;
+  $("carYear").value = car.year;
+  $("carEngine").value = car.engine;
+  $("carPlate").value = car.plate;
+
+  setImage($("carCover"), car.photo, "🚘");
+}
+
+$("carForm").addEventListener("submit", async event => {
+  event.preventDefault();
+
+  if (carPhotoProcessing) {
+    alert("Poczekaj na zakończenie przetwarzania zdjęcia.");
+    return;
+  }
+
+  const yearRaw = $("carYear").value;
+  const year = yearRaw === "" ? "" : Number(yearRaw);
+
+  if (year !== "" &&
+      (!Number.isInteger(year) || year < 1886 || year > 2100)) {
+    alert("Podaj prawidłowy rok produkcji.");
+    return;
+  }
+
+  const previous = car;
+
+  car = {
+    make: $("carMake").value.trim().slice(0, 60),
+    model: $("carModel").value.trim().slice(0, 60),
+    year: year === "" ? "" : String(year),
+    engine: $("carEngine").value.trim().slice(0, 80),
+    plate: $("carPlate").value.trim().slice(0, 20),
+    photo: $("removeCarPhoto").checked
+      ? ""
+      : pendingCarPhoto || car.photo || ""
+  };
+
+  if (!persist(CAR_KEY, car)) {
+    car = previous;
+    return;
+  }
+
+  pendingCarPhoto = "";
+  $("carPhoto").value = "";
+  $("removeCarPhoto").checked = false;
+
+  renderAll();
+  alert("Profil samochodu został zapisany.");
+});
+
+// ================= PRZYPOMNIENIA =================
+
+function saveReminders() {
+  return persist(REMINDER_KEY, reminders);
+}
+
+function reminderInfo(value, label) {
+  if (!value) {
+    return {
+      text: "Ustaw datę " + label + ".",
+      className: ""
+    };
+  }
+
+  if (!validDate(value)) {
+    return {
+      text: "Nieprawidłowa data.",
+      className: "red"
+    };
+  }
+
+  const [year, month, day] = value.split("-").map(Number);
+  const deadline = Date.UTC(year, month - 1, day);
+
+  const now = new Date();
+  const current = Date.UTC(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate()
+  );
+
+  const days = Math.round((deadline - current) / 86400000);
+
+  if (days < 0) {
+    return {
+      text: "⚠️ Termin minął " + Math.abs(days) + " dni temu!",
+      className: "red",
+      days
+    };
+  }
+
+  if (days === 0) {
+    return {
+      text: "🔴 Termin upływa dzisiaj!",
+      className: "red",
+      days
+    };
+  }
+
+  if (days <= 7) {
+    return {
+      text: "🔴 Uwaga! Zostało tylko " + days + " dni!",
+      className: "red",
+      days
+    };
+  }
+
+  if (days <= 30) {
+    return {
+      text: "🟠 Do terminu pozostało " + days + " dni.",
+      className: "orange",
+      days
+    };
+  }
+
+  return {
+    text: "🟢 Wszystko w porządku — " + days + " dni do terminu.",
+    className: "green",
+    days
+  };
+}
+
+function updateReminderDisplay(inputId, statusId, label) {
+  const info = reminderInfo($(inputId).value, label);
+  const status = $(statusId);
+
+  status.className = "status" +
+    (info.className ? " " + info.className : "");
+
+  status.textContent = info.text;
+}
+
+function refreshReminders() {
+  updateReminderDisplay(
+    "inspectionDate",
+    "inspectionStatus",
+    "przeglądu technicznego"
+  );
+
+  updateReminderDisplay(
+    "ocDate",
+    "ocStatus",
+    "ubezpieczenia OC"
+  );
+}
+
+function renderDashboardReminders() {
+  const list = [
+    {
+      name: "Przegląd techniczny",
+      value: reminders.inspectionDate
+    },
+    {
+      name: "Ubezpieczenie OC",
+      value: reminders.ocDate
+    }
+  ].filter(item => item.value && validDate(item.value))
+    .sort((a, b) => a.value.localeCompare(b.value));
+
+  $("dashReminders").innerHTML = list.length
+    ? list.map(item => {
+        const info = reminderInfo(item.value, item.name);
+
+        return `
+          <div class="entry">
+            <strong>${safe(item.name)}</strong>
+            <div class="entry-meta">Ważne do: ${safe(item.value)}</div>
+            <div class="status ${safe(info.className)}">${safe(info.text)}</div>
+          </div>
+        `;
+      }).join("")
+    : '<div class="empty">Ustaw daty przeglądu i OC, aby śledzić terminy.</div>';
+}
+
+function renderReminderInputs() {
+  $("inspectionDate").value = reminders.inspectionDate || "";
+  $("ocDate").value = reminders.ocDate || "";
+  refreshReminders();
+}
+
+["inspectionDate", "ocDate"].forEach(id => {
+  $(id).addEventListener("change", () => {
+    const value = $(id).value;
+
+    if (value && !validDate(value)) {
+      alert("Wybierz prawidłową datę.");
+      return;
+    }
+
+    const previous = { ...reminders };
+    reminders[id] = value;
+
+    if (!saveReminders()) {
+      reminders = previous;
+      renderReminderInputs();
+      return;
+    }
+
+    refreshReminders();
+    renderDashboardReminders();
+  });
+});
+
+// ================= EKSPORT CAŁEJ APLIKACJI =================
+
+$("exportButton").addEventListener("click", () => {
+  const backup = {
+    app: "AutoLog",
+    version: BACKUP_VERSION,
+    exportedAt: new Date().toISOString(),
+    entries,
+    budget,
+    car,
+    reminders
+  };
+
+  const blob = new Blob(
+    [JSON.stringify(backup, null, 2)],
+    { type: "application/json" }
+  );
+
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = "autolog-kopia-" + today() + ".json";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
+});
+
+// ================= IMPORT CAŁEJ APLIKACJI =================
+
+function validateEntry(entry) {
+  return entry &&
+    typeof entry === "object" &&
+    typeof entry.date === "string" &&
+    validDate(entry.date) &&
+    typeof entry.category === "string" &&
+    entry.category.length <= 100 &&
+    Number.isFinite(Number(entry.amount)) &&
+    Number(entry.amount) > 0 &&
+    Number(entry.amount) <= Number.MAX_SAFE_INTEGER / 100 &&
+    Number.isSafeInteger(Math.round(Number(entry.amount) * 100)) &&
+    (entry.description == null ||
+      typeof entry.description === "string") &&
+    (entry.receipt == null ||
+      entry.receipt === "" ||
+      (typeof entry.receipt === "string" &&
+       entry.receipt.startsWith("data:image/") &&
+       entry.receipt.length <= 10 * 1024 * 1024));
+}
+
+function normalizeEntry(entry) {
+  return {
+    id: typeof entry.id === "string" && entry.id
+      ? entry.id
+      : makeId(),
+
+    date: entry.date,
+    category: entry.category === "Przegląd"
+      ? "Inne"
+      : entry.category,
+
+    amount: Math.round(Number(entry.amount) * 100) / 100,
+
+    description: String(entry.description || "").slice(0, 300),
+
+    receipt: typeof entry.receipt === "string" &&
+      entry.receipt.startsWith("data:image/")
+      ? entry.receipt
+      : ""
+  };
+}
+
+function validatePhoto(value) {
+  return value === "" ||
+    (typeof value === "string" &&
+      value.startsWith("data:image/") &&
+      value.length <= 10 * 1024 * 1024);
+}
+
+$("importButton").addEventListener("click", async () => {
+  const file = $("importFile").files[0];
+
+  if (!file) {
+    alert("Najpierw wybierz plik kopii zapasowej.");
+    return;
+  }
+
+  if (file.size > 50 * 1024 * 1024) {
+    alert("Plik kopii jest za duży. Maksymalny rozmiar to 50 MB.");
+    return;
+  }
+
+  try {
+    const data = JSON.parse(await file.text());
+
+    const list = Array.isArray(data) ? data : data.entries;
+
+    if (!Array.isArray(list) || !list.every(validateEntry)) {
+      throw new Error("Plik zawiera nieprawidłowe wpisy wydatków.");
+    }
+
+    let newBudget = 0;
+
+    if (!Array.isArray(data) && data.budget != null) {
+      newBudget = Number(data.budget);
+
+      if (!Number.isFinite(newBudget) || newBudget < 0 ||
+          newBudget > Number.MAX_SAFE_INTEGER / 100) {
+        throw new Error("Nieprawidłowa wartość budżetu.");
+      }
+    }
+
+    let newCar = {
+      make: "",
+      model: "",
+      year: "",
+      engine: "",
+      plate: "",
+      photo: ""
+    };
+
+    if (!Array.isArray(data) && data.car != null) {
+      if (!data.car || typeof data.car !== "object") {
+        throw new Error("Nieprawidłowy profil samochodu.");
+      }
+
+      const source = data.car;
+
+      if (source.year && (
+        !Number.isInteger(Number(source.year)) ||
+        Number(source.year) < 1886 ||
+        Number(source.year) > 2100
+      )) {
+        throw new Error("Nieprawidłowy rok samochodu.");
+      }
+
+      if (!validatePhoto(source.photo || "")) {
+        throw new Error("Nieprawidłowe zdjęcie samochodu.");
+      }
+
+      newCar = {
+        make: String(source.make || "").slice(0, 60),
+        model: String(source.model || "").slice(0, 60),
+        year: source.year ? String(source.year) : "",
+        engine: String(source.engine || "").slice(0, 80),
+        plate: String(source.plate || "").slice(0, 20),
+        photo: source.photo || ""
+      };
+    }
+
+    let newReminders = {
+      inspectionDate: "",
+      ocDate: ""
+    };
+
+    if (!Array.isArray(data) && data.reminders != null) {
+      if (!data.reminders || typeof data.reminders !== "object") {
+        throw new Error("Nieprawidłowe przypomnienia.");
+      }
+
+      for (const key of ["inspectionDate", "ocDate"]) {
+        const value = data.reminders[key] || "";
+
+        if (value && !validDate(value)) {
+          throw new Error("Nieprawidłowa data przypomnienia.");
+        }
+
+        newReminders[key] = value;
+      }
+    }
+
+    const newEntries = list.map(normalizeEntry);
+
+    if (!confirm(
+      "Import zastąpi obecne wydatki, budżet, profil auta i przypomnienia. " +
+      "Przed kontynuacją pobierz kopię aktualnych danych. Kontynuować?"
+    )) {
+      return;
+    }
+
+    const oldEntries = entries;
+    const oldBudget = budget;
+    const oldCar = car;
+    const oldReminders = reminders;
+
+    entries = newEntries;
+    budget = Math.round(newBudget * 100) / 100;
+    car = newCar;
+    reminders = newReminders;
+
+    const saved = persist(KEY, entries) &&
+      persist(BUDGET_KEY, budget) &&
+      persist(CAR_KEY, car) &&
+      persist(REMINDER_KEY, reminders);
+
+    if (!saved) {
+      entries = oldEntries;
+      budget = oldBudget;
+      car = oldCar;
+      reminders = oldReminders;
+
+      persist(KEY, entries);
+      persist(BUDGET_KEY, budget);
+      persist(CAR_KEY, car);
+      persist(REMINDER_KEY, reminders);
+
+      throw new Error(
+        "Nie udało się zapisać wszystkich danych. Przywrócono poprzednie dane w pamięci."
+      );
+    }
+
+    resetExpenseForm();
+    renderReminderInputs();
+    renderAll();
+    goTo("dashboard");
+
+    alert("Dane zostały przywrócone.");
+  } catch (error) {
+    alert("Błąd importu: " + error.message);
+  } finally {
+    $("importFile").value = "";
+  }
+});
+
+// ================= ODCZYT ZAPISANYCH DANYCH =================
+
+function loadEntries() {
+  try {
+    const data = JSON.parse(localStorage.getItem(KEY) || "[]");
+
+    if (Array.isArray(data)) {
+      entries = data.filter(validateEntry).map(normalizeEntry);
+    }
+  } catch (error) {
+    entries = [];
+    alert("Nie udało się odczytać zapisanych wydatków.");
+  }
+}
+
+function loadBudget() {
+  try {
+    const data = JSON.parse(localStorage.getItem(BUDGET_KEY) || "0");
+    const value = Number(data);
+
+    budget = Number.isFinite(value) && value >= 0 &&
+      value <= Number.MAX_SAFE_INTEGER / 100
+      ? value
+      : 0;
+  } catch (error) {
+    budget = 0;
+  }
+}
+
+function loadCar() {
+  try {
+    const data = JSON.parse(localStorage.getItem(CAR_KEY) || "null");
+
+    if (data && typeof data === "object") {
+      car = {
+        make: String(data.make || "").slice(0, 60),
+        model: String(data.model || "").slice(0, 60),
+        year: data.year ? String(data.year) : "",
+        engine: String(data.engine || "").slice(0, 80),
+        plate: String(data.plate || "").slice(0, 20),
+        photo: validatePhoto(data.photo || "") ? data.photo || "" : ""
+      };
+    }
+  } catch (error) {
+    // Pozostaw wartości domyślne.
+  }
+}
+
+function loadReminders() {
+  try {
+    const data = JSON.parse(
+      localStorage.getItem(REMINDER_KEY) || "{}"
+    );
+
+    reminders = {
+      inspectionDate: validDate(data.inspectionDate)
+        ? data.inspectionDate : "",
+      ocDate: validDate(data.ocDate)
+        ? data.ocDate : ""
+    };
+  } catch (error) {
+    reminders = {
+      inspectionDate: "",
+      ocDate: ""
+    };
+  }
+}
+
+// ================= AKTUALIZACJA WIDOKÓW =================
+
+function renderAll() {
+  renderDashboard();
+  renderHistory();
+  renderStats();
+  renderCar();
+  refreshReminders();
+  renderDashboardReminders();
+}
+
+$("todayLabel").textContent = new Date().toLocaleDateString("pl-PL", {
+  weekday: "short",
+  day: "numeric",
+  month: "long",
+  year: "numeric"
+});
+
+$("expenseDate").value = today();
+
+loadEntries();
+loadBudget();
+loadCar();
+loadReminders();
+
+renderReminderInputs();
+renderAll();
+</script>
+</body>
+</html>
