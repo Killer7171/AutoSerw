@@ -296,7 +296,11 @@ textarea {
 }
 
 .btn-block {
+  display: flex;
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
   margin-top: 14px;
 }
 
@@ -637,6 +641,7 @@ footer {
 <nav aria-label="Menu główne">
   <button class="active" data-page="dashboard">🏠 Start</button>
   <button data-page="expenses">💸 Wydatki</button>
+  <button data-page="service">🔧 Historia serwisowa</button>
   <button data-page="stats">📊 Statystyki</button>
   <button data-page="car">🚗 Mój samochód</button>
   <button data-page="reminders">📅 Terminy</button>
@@ -1008,6 +1013,139 @@ footer {
   </div>
 </section>
 
+<!-- ================= HISTORIA SERWISOWA ================= -->
+
+<section class="page" id="page-service">
+  <div class="section-head">
+    <h2>🔧 Historia serwisowa</h2>
+  </div>
+
+  <div class="grid-3">
+    <div class="card">
+      <div class="stat-label">Wpisy serwisowe</div>
+      <div class="stat-value" id="serviceCount">0</div>
+    </div>
+    <div class="card">
+      <div class="stat-label">Koszty serwisu</div>
+      <div class="stat-value green-text" id="serviceTotal">0,00 zł</div>
+    </div>
+    <div class="card">
+      <div class="stat-label">Ostatni przebieg</div>
+      <div class="stat-value" id="serviceMileage">—</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 id="serviceFormTitle">Dodaj wpis serwisowy</h2>
+
+    <form id="serviceForm">
+      <div class="form-grid">
+        <div>
+          <label for="serviceDate">Data wykonania</label>
+          <input type="date" id="serviceDate" required>
+        </div>
+
+        <div>
+          <label for="serviceType">Rodzaj usługi</label>
+          <select id="serviceType" required>
+            <option value="Przegląd okresowy">Przegląd okresowy</option>
+            <option value="Wymiana oleju">Wymiana oleju</option>
+            <option value="Wymiana filtrów">Wymiana filtrów</option>
+            <option value="Układ hamulcowy">Układ hamulcowy</option>
+            <option value="Rozrząd">Rozrząd</option>
+            <option value="Opony">Opony</option>
+            <option value="Naprawa mechaniczna">Naprawa mechaniczna</option>
+            <option value="Naprawa elektryczna">Naprawa elektryczna</option>
+            <option value="Klimatyzacja">Klimatyzacja</option>
+            <option value="Inne">Inne</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="serviceMileageInput">Przebieg (km)</label>
+          <input type="number" id="serviceMileageInput"
+            min="0" max="10000000" step="1"
+            placeholder="np. 125000">
+        </div>
+
+        <div>
+          <label for="serviceCost">Koszt (zł)</label>
+          <input type="number" id="serviceCost"
+            min="0" max="90071992547409" step="0.01"
+            placeholder="np. 450,00" required>
+        </div>
+
+        <div class="span-2">
+          <label for="serviceWorkshop">Warsztat / serwis</label>
+          <input type="text" id="serviceWorkshop"
+            maxlength="120" placeholder="np. Auto Serwis">
+        </div>
+
+        <div class="span-2">
+          <label for="serviceDescription">Opis wykonanych prac</label>
+          <textarea id="serviceDescription" maxlength="1000"
+            placeholder="Wykonane czynności, wymienione części, uwagi..."></textarea>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-block" id="serviceSubmit">
+        Zapisz wpis serwisowy
+      </button>
+
+      <button type="button" class="btn btn-secondary btn-block"
+        id="serviceCancel" hidden>
+        Anuluj edycję
+      </button>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="section-head">
+      <h2>Historia napraw i przeglądów</h2>
+    </div>
+
+    <div class="filter-grid">
+      <div>
+        <label for="serviceSearch">Szukaj</label>
+        <input type="search" id="serviceSearch"
+          placeholder="Usługa, warsztat, opis...">
+      </div>
+
+      <div>
+        <label for="serviceFilterType">Rodzaj usługi</label>
+        <select id="serviceFilterType">
+          <option value="">Wszystkie usługi</option>
+          <option>Przegląd okresowy</option>
+          <option>Wymiana oleju</option>
+          <option>Wymiana filtrów</option>
+          <option>Układ hamulcowy</option>
+          <option>Rozrząd</option>
+          <option>Opony</option>
+          <option>Naprawa mechaniczna</option>
+          <option>Naprawa elektryczna</option>
+          <option>Klimatyzacja</option>
+          <option>Inne</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="serviceFilterMonth">Miesiąc</label>
+        <input type="month" id="serviceFilterMonth">
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="button" class="btn btn-secondary"
+        id="serviceClearFilters">
+        Wyczyść filtry
+      </button>
+    </div>
+
+    <p class="note" id="serviceSummary" style="margin-top:15px"></p>
+    <div id="serviceHistory"></div>
+  </div>
+</section>
+
 <!-- ================= PRZYPOMNIENIA ================= -->
 
 <section class="page" id="page-reminders">
@@ -1059,7 +1197,7 @@ footer {
     <h2>Eksport danych</h2>
     <p class="muted">
       Pobierz plik JSON zawierający wydatki, zdjęcia paragonów,
-      profil samochodu, budżet i daty przypomnień.
+      historię serwisową, profil samochodu, budżet i daty przypomnień.
     </p>
     <button class="btn btn-block" id="exportButton">
       Pobierz pełną kopię zapasową
@@ -1110,7 +1248,9 @@ const REMINDER_KEY = "autolog_reminders_v1";
 const BUDGET_KEY = "autolog_budget_v1";
 const CAR_KEY = "autolog_car_v1";
 const BACKUP_VERSION = 2;
-
+const SERVICE_KEY = "autolog_service_v1";
+let serviceEntries = [];
+let serviceEditId = null;
 let entries = [];
 let editId = null;
 let budget = 0;
@@ -1227,7 +1367,7 @@ function goTo(page) {
   document.querySelectorAll("nav button[data-page]").forEach(button => {
     button.classList.toggle("active", button.dataset.page === page);
   });
-
+  if (page === "service") renderServiceHistory();
   if (page === "stats") renderStats();
   if (page === "car") renderCar();
   if (page === "expenses") renderHistory();
@@ -1900,6 +2040,268 @@ $("carForm").addEventListener("submit", async event => {
   alert("Profil samochodu został zapisany.");
 });
 
+/* ================= HISTORIA SERWISOWA ================= */
+
+function saveServiceEntries() {
+  return persist(SERVICE_KEY, serviceEntries);
+}
+
+function resetServiceForm() {
+  serviceEditId = null;
+  $("serviceForm").reset();
+  $("serviceDate").value = today();
+  $("serviceFormTitle").textContent = "Dodaj wpis serwisowy";
+  $("serviceSubmit").textContent = "Zapisz wpis serwisowy";
+  $("serviceCancel").hidden = true;
+}
+
+function serviceHTML(entry) {
+  return `
+    <div class="entry">
+      <div class="entry-top">
+        <div>
+          <div class="entry-title">${safe(entry.type)}</div>
+          <div class="entry-meta">
+            ${safe(entry.date)}
+            ${entry.mileage !== "" ?
+              " · " + Number(entry.mileage).toLocaleString("pl-PL") + " km" : ""}
+          </div>
+        </div>
+        <div class="entry-amount">${money(entry.cost)}</div>
+      </div>
+
+      ${entry.workshop ?
+        `<p class="entry-meta">Warsztat: ${safe(entry.workshop)}</p>` : ""}
+
+      ${entry.description ?
+        `<p class="entry-description">${safe(entry.description)}</p>` : ""}
+
+      <div class="actions">
+        <button type="button" class="btn btn-secondary btn-small"
+          data-service-edit="${safe(entry.id)}">Edytuj</button>
+        <button type="button" class="btn btn-danger btn-small"
+          data-service-delete="${safe(entry.id)}">Usuń</button>
+      </div>
+    </div>
+  `;
+}
+
+function filteredServiceEntries() {
+  const query = $("serviceSearch").value
+    .trim().toLocaleLowerCase("pl-PL");
+  const type = $("serviceFilterType").value;
+  const month = $("serviceFilterMonth").value;
+
+  return [...serviceEntries]
+    .filter(e => !type || e.type === type)
+    .filter(e => !month || e.date.slice(0, 7) === month)
+    .filter(e => !query || [
+      e.type, e.workshop, e.description,
+      e.date, e.mileage, e.cost
+    ].join(" ").toLocaleLowerCase("pl-PL").includes(query))
+    .sort((a, b) =>
+      b.date.localeCompare(a.date) ||
+      String(b.id).localeCompare(String(a.id))
+    );
+}
+
+function renderServiceHistory() {
+  const list = filteredServiceEntries();
+
+  $("serviceCount").textContent = serviceEntries.length;
+  $("serviceTotal").textContent = money(
+    sum(serviceEntries.map(e => ({ amount: e.cost })))
+  );
+
+  const mileageEntries = serviceEntries
+    .filter(e => e.mileage !== "")
+    .sort((a, b) =>
+      b.date.localeCompare(a.date) ||
+      Number(b.mileage) - Number(a.mileage)
+    );
+
+  $("serviceMileage").textContent = mileageEntries.length
+    ? Number(mileageEntries[0].mileage).toLocaleString("pl-PL") + " km"
+    : "—";
+
+  $("serviceSummary").textContent =
+    "Wyświetlane wpisy: " + list.length +
+    " · Suma kosztów: " +
+    money(list.reduce((total, e) => total + e.cost, 0));
+
+  $("serviceHistory").innerHTML = list.length
+    ? list.map(serviceHTML).join("")
+    : '<div class="empty">Brak wpisów serwisowych.</div>';
+}
+
+$("serviceForm").addEventListener("submit", event => {
+  event.preventDefault();
+
+  const date = $("serviceDate").value;
+  const rawCost = $("serviceCost").value;
+  const cost = Number(rawCost);
+  const rawMileage = $("serviceMileageInput").value;
+  const mileage = rawMileage === "" ? "" : Number(rawMileage);
+
+  if (!validDate(date)) {
+    alert("Wybierz prawidłową datę serwisu.");
+    return;
+  }
+
+  if (rawCost === "" || !Number.isFinite(cost) || cost < 0 ||
+      cost > Number.MAX_SAFE_INTEGER / 100) {
+    alert("Podaj prawidłowy koszt serwisu.");
+    return;
+  }
+
+  if (rawMileage !== "" &&
+      (!Number.isSafeInteger(mileage) || mileage < 0 ||
+       mileage > 10000000)) {
+    alert("Podaj prawidłowy przebieg w kilometrach.");
+    return;
+  }
+
+  const previous = serviceEntries;
+
+  const entry = {
+    id: serviceEditId || makeId(),
+    date,
+    type: $("serviceType").value,
+    mileage,
+    cost: Math.round(cost * 100) / 100,
+    workshop: $("serviceWorkshop").value.trim().slice(0, 120),
+    description: $("serviceDescription").value.trim().slice(0, 1000)
+  };
+
+  serviceEntries = serviceEditId
+    ? serviceEntries.map(e => e.id === serviceEditId ? entry : e)
+    : [...serviceEntries, entry];
+
+  if (!saveServiceEntries()) {
+    serviceEntries = previous;
+    return;
+  }
+
+  resetServiceForm();
+  renderServiceHistory();
+  alert("Wpis serwisowy został zapisany.");
+});
+
+$("serviceCancel").addEventListener("click", resetServiceForm);
+
+$("serviceHistory").addEventListener("click", event => {
+  const editButton = event.target.closest("[data-service-edit]");
+  const deleteButton = event.target.closest("[data-service-delete]");
+
+  if (editButton) {
+    const entry = serviceEntries.find(
+      e => e.id === editButton.dataset.serviceEdit
+    );
+
+    if (!entry) return;
+
+    serviceEditId = entry.id;
+    $("serviceDate").value = entry.date;
+    $("serviceType").value = entry.type;
+    $("serviceMileageInput").value = entry.mileage;
+    $("serviceCost").value = entry.cost;
+    $("serviceWorkshop").value = entry.workshop;
+    $("serviceDescription").value = entry.description;
+
+    $("serviceFormTitle").textContent = "Edytuj wpis serwisowy";
+    $("serviceSubmit").textContent = "Zapisz zmiany";
+    $("serviceCancel").hidden = false;
+
+    $("serviceForm").scrollIntoView({ behavior: "smooth" });
+    return;
+  }
+
+  if (deleteButton) {
+    const entry = serviceEntries.find(
+      e => e.id === deleteButton.dataset.serviceDelete
+    );
+
+    if (!entry || !confirm("Czy na pewno usunąć ten wpis serwisowy?")) {
+      return;
+    }
+
+    const previous = serviceEntries;
+    serviceEntries = serviceEntries.filter(e => e.id !== entry.id);
+
+    if (!saveServiceEntries()) {
+      serviceEntries = previous;
+      return;
+    }
+
+    renderServiceHistory();
+  }
+});
+
+["serviceSearch", "serviceFilterType", "serviceFilterMonth"]
+  .forEach(id => {
+    $(id).addEventListener("input", renderServiceHistory);
+    $(id).addEventListener("change", renderServiceHistory);
+  });
+
+$("serviceClearFilters").addEventListener("click", () => {
+  $("serviceSearch").value = "";
+  $("serviceFilterType").value = "";
+  $("serviceFilterMonth").value = "";
+  renderServiceHistory();
+});
+
+function validateServiceEntry(entry) {
+  if (!entry || typeof entry !== "object" ||
+      !validDate(entry.date) ||
+      typeof entry.type !== "string" ||
+      entry.type.length > 100 ||
+      typeof entry.cost !== "number" ||
+      !Number.isFinite(entry.cost) ||
+      entry.cost < 0 ||
+      entry.cost > Number.MAX_SAFE_INTEGER / 100 ||
+      !Number.isSafeInteger(Math.round(entry.cost * 100))) {
+    return false;
+  }
+
+  const mileage = entry.mileage;
+
+  return (mileage === "" ||
+      (Number.isSafeInteger(mileage) &&
+       mileage >= 0 && mileage <= 10000000)) &&
+    (entry.workshop == null ||
+      typeof entry.workshop === "string") &&
+    (entry.description == null ||
+      typeof entry.description === "string");
+}
+
+function normalizeServiceEntry(entry) {
+  return {
+    id: typeof entry.id === "string" && entry.id
+      ? entry.id : makeId(),
+    date: entry.date,
+    type: entry.type.slice(0, 100),
+    mileage: entry.mileage === "" ? "" : entry.mileage,
+    cost: Math.round(entry.cost * 100) / 100,
+    workshop: String(entry.workshop || "").slice(0, 120),
+    description: String(entry.description || "").slice(0, 1000)
+  };
+}
+
+function loadServiceEntries() {
+  try {
+    const data = JSON.parse(
+      localStorage.getItem(SERVICE_KEY) || "[]"
+    );
+
+    serviceEntries = Array.isArray(data)
+      ? data.filter(validateServiceEntry).map(normalizeServiceEntry)
+      : [];
+  } catch (error) {
+    serviceEntries = [];
+    alert("Nie udało się odczytać historii serwisowej.");
+  }
+}
+
 // ================= PRZYPOMNIENIA =================
 
 function saveReminders() {
@@ -2057,14 +2459,15 @@ function renderReminderInputs() {
 
 $("exportButton").addEventListener("click", () => {
   const backup = {
-    app: "AutoLog",
-    version: BACKUP_VERSION,
-    exportedAt: new Date().toISOString(),
-    entries,
-    budget,
-    car,
-    reminders
-  };
+  app: "AutoLog",
+  version: BACKUP_VERSION,
+  exportedAt: new Date().toISOString(),
+  entries,
+  serviceEntries,
+  budget,
+  car,
+  reminders
+};
 
   const blob = new Blob(
     [JSON.stringify(backup, null, 2)],
@@ -2226,10 +2629,22 @@ $("importButton").addEventListener("click", async () => {
       }
     }
 
+    let newServiceEntries = serviceEntries;
+
+    if (!Array.isArray(data) && "serviceEntries" in data) {
+      if (!Array.isArray(data.serviceEntries) ||
+          !data.serviceEntries.every(validateServiceEntry)) {
+        throw new Error("Nieprawidłowa historia serwisowa.");
+      }
+
+      newServiceEntries = data.serviceEntries.map(normalizeServiceEntry);
+    }
+
     const newEntries = list.map(normalizeEntry);
 
     if (!confirm(
-      "Import zastąpi obecne wydatki, budżet, profil auta i przypomnienia. " +
+      "Import zastąpi obecne wydatki, historię serwisową, budżet, " +
+      "profil auta i przypomnienia. " +
       "Przed kontynuacją pobierz kopię aktualnych danych. Kontynuować?"
     )) {
       return;
@@ -2239,27 +2654,32 @@ $("importButton").addEventListener("click", async () => {
     const oldBudget = budget;
     const oldCar = car;
     const oldReminders = reminders;
+    const oldServiceEntries = serviceEntries;
 
     entries = newEntries;
     budget = Math.round(newBudget * 100) / 100;
     car = newCar;
     reminders = newReminders;
+    serviceEntries = newServiceEntries;
 
     const saved = persist(KEY, entries) &&
       persist(BUDGET_KEY, budget) &&
       persist(CAR_KEY, car) &&
-      persist(REMINDER_KEY, reminders);
+      persist(REMINDER_KEY, reminders) &&
+      persist(SERVICE_KEY, serviceEntries);
 
     if (!saved) {
       entries = oldEntries;
       budget = oldBudget;
       car = oldCar;
       reminders = oldReminders;
+      serviceEntries = oldServiceEntries;
 
       persist(KEY, entries);
       persist(BUDGET_KEY, budget);
       persist(CAR_KEY, car);
       persist(REMINDER_KEY, reminders);
+      persist(SERVICE_KEY, serviceEntries);
 
       throw new Error(
         "Nie udało się zapisać wszystkich danych. Przywrócono poprzednie dane w pamięci."
@@ -2356,6 +2776,7 @@ function renderAll() {
   renderCar();
   refreshReminders();
   renderDashboardReminders();
+  renderServiceHistory();
 }
 
 $("todayLabel").textContent = new Date().toLocaleDateString("pl-PL", {
@@ -2366,11 +2787,13 @@ $("todayLabel").textContent = new Date().toLocaleDateString("pl-PL", {
 });
 
 $("expenseDate").value = today();
+$("serviceDate").value = today();
 
 loadEntries();
 loadBudget();
 loadCar();
 loadReminders();
+loadServiceEntries();
 
 renderReminderInputs();
 renderAll();
